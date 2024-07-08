@@ -1450,6 +1450,72 @@ var create3DContext = function(opt_canvas, opt_attributes, opt_version) {
   if (!context) {
     testFailed("Unable to fetch WebGL rendering context for Canvas");
   }
+  const shaderSource_ = context.shaderSource.bind(context);
+  const createShader_ = context.createShader.bind(context);
+  const shaderMap = new Map();
+  context.createShader = function(type) {
+    const ret = createShader_(type);
+    shaderMap.set(ret, type);
+    return ret;
+  }
+  context.shaderSource = function(shader, source) {
+    const type = shaderMap.get(shader);
+    // console.log(type, source);
+    shaderSource_(shader, source);
+
+    // fetch('http://127.0.0.1:5000/savejson', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   },
+    //   body: JSON.stringify(data)
+    // })
+    // .then(response => response.json())
+    // .then(data => {
+    //   console.log('Success:', data);
+    // })
+    // .catch((error) => {
+    //   console.error('Error:', error);
+    // });
+
+    function postData(url, data) {
+      return fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      });
+    }
+    
+    function attemptPost(url, data, retryInterval = 50) {
+      postData(url, data)
+        .then(data => {
+          console.log('Success:', data);
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          setTimeout(() => {
+            attemptPost(url, data, retryInterval);
+          }, retryInterval);
+        });
+    }
+    
+
+    const data = {
+      source: source,
+      type: type,
+      url: window.location.href,
+    }
+    attemptPost('http://127.0.0.1:5000/savejson', data);
+    
+  }
   return context;
 };
 
