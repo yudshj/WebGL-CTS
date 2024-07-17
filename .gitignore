@@ -1,4 +1,5 @@
-conformance-suites/2.0.0/saved_jsons/
+saved_jsons
+saved_jsons_bundle
 
 .htaccess
 *.Makefile
@@ -50,3 +51,6 @@ extensions/registry.xml
 extensions/extension-schematron.xsl
 extensions/schematron/webgl_message.xsl
 
+saved_jsons_bundle
+bundle_saved_jsons
+saved_jsons_bundle_old
