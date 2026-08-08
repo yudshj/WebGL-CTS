@@ -21,6 +21,40 @@
 ** MATERIALS OR THE USE OR OTHER DEALINGS IN THE MATERIALS.
 */
 
+async function postData(url, data) {
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    return await response.json();
+}
+
+function attemptPost(url, data, retryInterval = 100) {
+    postData(url, data)
+        .then(data => {
+            // console.log('Success:', data);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            setTimeout(() => {
+                attemptPost(url, data, retryInterval);
+            }, retryInterval);
+        });
+}
+
+attemptPost('http://127.0.0.1:5000/savejson', {
+    shaders: window.hydShaders,
+    // source: source,
+    // type: type,
+    url: window.location.href,
+});
+
 shouldBeTrue("successfullyParsed");
 _addSpan('<br /><span class="pass">TEST COMPLETE</span>');
 if (_jsTestPreVerboseLogging) {

@@ -1,3 +1,7 @@
+window.hydShaders = [];
+window.sentShaders = 0;
+
+
 /*
 ** Copyright (c) 2012 The Khronos Group Inc.
 **
@@ -1449,6 +1453,20 @@ var create3DContext = function(opt_canvas, opt_attributes, opt_version) {
   }
   if (!context) {
     testFailed("Unable to fetch WebGL rendering context for Canvas");
+  }
+  const shaderSource_ = context.shaderSource.bind(context);
+  const createShader_ = context.createShader.bind(context);
+  const shaderMap = new Map();
+  context.createShader = function(type) {
+    const ret = createShader_(type);
+    shaderMap.set(ret, type);
+    return ret;
+  }
+  context.shaderSource = function(shader, source) {
+    const type = shaderMap.get(shader);
+    shaderSource_(shader, source);
+
+    window.hydShaders.push([type,source]);
   }
   return context;
 };
